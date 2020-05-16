@@ -1,0 +1,6 @@
+<RCC>
+    <qresource lang="Footer" prefix="/new/prefix1"/>
+    <qresource prefix="/new/prefix1">
+        <file>sh_footer.png</file>
+    </qresource>
+</RCC>
