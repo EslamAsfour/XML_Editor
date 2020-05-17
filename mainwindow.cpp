@@ -4,6 +4,9 @@
 #include <QMessageBox>
 #include <QFile>
 #include <QTextStream>
+#include "xml_tree.h"
+#include <QDebug>
+#include <QTime>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -25,17 +28,72 @@ void MainWindow::on_pushButton_2_clicked()
    if(! inputFile.open(QFile::ReadOnly | QFile::Text))
    {
        QMessageBox::warning(this,"Error","File Not Opened");
+       return;
    }
-   QTextStream in(&inputFile);
-    QString  s;
-   while(!in.atEnd())
-    {
-       s= in.readAll();
-//ui->Page1->findChild<QTextBrowser*>("textBrowser_Input")->setHorizontalScrollBarPolicy()
-        ui->Page1->findChild<QTextBrowser*>("textBrowser_Input")->insertPlainText(s);
 
+   QTextStream in(&inputFile);
+   QString  s;
+
+    //Formatting
+    qDebug() << "Start";
+   MainTree.MakeItReady(File_Path);
+    qDebug() << "End";
+   //Show the input fill in the GUI
+    QTime myTimer;
+    myTimer.start();
+
+
+  // while(!in.atEnd())
+    {
+     //  s= in.readAll();
+      // ui->Page1->findChild<QTextBrowser*>("textBrowser_Input")->insertPlainText(s);
    }
- inputFile.close();
+    int nMilliseconds = myTimer.elapsed();
+    inputFile.close();
+    qDebug() << nMilliseconds/1000;
+
+
+
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+
+    QString InPathRdy = "C:/Users/LEGION/Documents/InRdy.txt" ;
+     qDebug() << "Fiil Tree start";
+    MainTree.FillTree(InPathRdy);
+    qDebug() << "Fiil Tree end";
+    QString OutPath = "C:/Users/LEGION/Documents/Output1.txt" ;
+    QFile OutFile(OutPath);
+    if(OutFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
+    {
+        QString s;
+        QTextStream out(&OutFile);
+        formatting_xml(MainTree.GetHead(),s,0);
+        out << s;
+    }
+    qDebug() << "Print Done";
+    OutFile.flush();
+    OutFile.close();
+    QFile inputFile(OutPath);
+    if(! inputFile.open(QFile::ReadOnly | QFile::Text))
+    {
+        QMessageBox::warning(this,"Error","File Not Opened");
+        return;
+    }
+
+    QTextStream in(&inputFile);
+    QString  s;
+
+
+    //Show the input fill in the GUI
+    //while(!in.atEnd())
+     {
+       // s= in.readAll();
+       // ui->Page1->findChild<QTextBrowser*>("textBrowser_Output")->insertPlainText(s);
+    }
+
+   inputFile.close();
 
 
 
