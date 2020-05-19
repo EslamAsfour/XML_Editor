@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->stackedWidget_9->setCurrentIndex(0);
 }
 
 MainWindow::~MainWindow()
@@ -94,6 +95,25 @@ void MainWindow::on_pushButton_clicked()
     }
 
    inputFile.close();
+
+
+
+}
+
+void MainWindow::on_pushButton_4_clicked()
+{
+    ui->stackedWidget_9->setCurrentIndex(1);
+
+}
+
+void MainWindow::on_Submit_Word_clicked()
+{
+   QString word =  ui->Page2->findChild<QLineEdit*>("lineEdit_Word")->text();
+
+
+
+
+
 
 
 

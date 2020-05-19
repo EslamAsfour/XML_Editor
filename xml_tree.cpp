@@ -81,7 +81,6 @@ void XML_Tree::FillTree (QString FilePath)
         //Opening Tag			// We can take Tag name and Attribute from this line
                 if(input[0] == '<' && input[1] != '/' )
                 {
-
                     count++;
                     int index;
                     // Searching for the space to get the tag name only from the line
@@ -278,9 +277,9 @@ void formatting_xml(Node *N, QString &out,int counter)
     {
         TN =  "<" + N->TagName + ">";
         out +=  TN + "\n";
-        counter++;
+
         out  += space(counter) + N->Data + "\n";
-        counter--;
+
 
 
         /*TN = "<" + N->TagName + ">" + N->Data;
@@ -292,9 +291,9 @@ void formatting_xml(Node *N, QString &out,int counter)
     {
         TN = "<" + N->TagName + " "+ N->Attribute + "";
         out +=  TN + "\n";
-        counter++;
+
         out += space(counter) + N->Data + "\n";
-        counter--;
+
     }
 
 
