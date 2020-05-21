@@ -110,11 +110,36 @@ void MainWindow::on_Submit_Word_clicked()
 {
    QString word =  ui->Page2->findChild<QLineEdit*>("lineEdit_Word")->text();
 
+   if(word == "")
+   {
+       QMessageBox::warning(this,"Empty Input","Please make sure you fill the input field");
+       return;
+   }
+   //Call rasha's Functions
+   QString Out,num;
+   qDebug() << "word info start";
+   Out += "Def of input word is :\n";
+   MainTree.word_info(MainTree.GetHead(),word,Out,num);
+   ui->Page2->findChild<QLabel*>("label_Num")->setText(num);
+   Out += "Hypernym of input word is :\n";
+   qDebug() << "word info end";
+   MainTree.word_id(MainTree.GetHead(),word,Out);
+   qDebug() << "word id end";
 
+   qDebug() << Out;
+   ui->Page2->findChild<QTextBrowser*>("textBrowser_OutPage2")->insertPlainText(Out);
 
+}
 
+void MainWindow::on_pushButton_JSON_Form_clicked()
+{
+    ui->Page1->findChild<QTextBrowser*>("textBrowser_Output")->setText("");
+    int lvl = 0;
+    QTime myTimer;
+    myTimer.start();
 
-
-
-
+   MainTree.XMLtoJSON(MainTree.GetHead(),lvl);
+   int nMilliseconds = myTimer.elapsed();
+   qDebug() << nMilliseconds/1000;
+   qDebug() << "JSON end";
 }

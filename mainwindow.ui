@@ -71,7 +71,7 @@ border: 2px solid white;
     <item row="1" column="0">
      <widget class="QStackedWidget" name="stackedWidget_9">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="Page1">
        <layout class="QGridLayout" name="gridLayout_2">
@@ -340,7 +340,7 @@ p, li { white-space: pre-wrap; }
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_3">
+             <widget class="QPushButton" name="pushButton_JSON_Form">
               <property name="minimumSize">
                <size>
                 <width>0</width>
@@ -436,7 +436,7 @@ border: 2px solid white;
               </widget>
              </item>
              <item>
-              <widget class="QLabel" name="label_2">
+              <widget class="QLabel" name="label_Num">
                <property name="minimumSize">
                 <size>
                  <width>0</width>
@@ -449,7 +449,7 @@ border: 2px solid white;
                 </font>
                </property>
                <property name="text">
-                <string>50</string>
+                <string/>
                </property>
                <property name="alignment">
                 <set>Qt::AlignCenter</set>
@@ -625,7 +625,7 @@ border: 2px solid white;
             </widget>
            </item>
            <item>
-            <widget class="QTextBrowser" name="textBrowser"/>
+            <widget class="QTextBrowser" name="textBrowser_OutPage2"/>
            </item>
           </layout>
          </item>

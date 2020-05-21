@@ -10,11 +10,16 @@ struct Node
 {
     QString Data;
     QString Attribute;
+    QVector<QString>AttributeName;
+    QVector<QString>AttributeVal;
     QString TagName;
-    QVector<Node*> Children;
+    QVector<Node*>Children;
+    QVector<Node*>sorted;
+    int repeated = 0;
+    int starting_pos = 0;
+    bool printed = false;
     Node* Parent;
     bool done;
-
     //Constructor
     Node( QString Attr , QString Name , QString DataIn = "")
     {
@@ -45,6 +50,18 @@ public:
     void DoneNode();
     void FillTree (QString FilePath);
    void MakeItReady(QString InputFilePath);
+
+   //Rasha
+   void word_info(Node* head, QString input_1,QString &out, QString &num);
+   void word_id(Node* head, QString input_1,QString &out);
+
+
+
+   // Ahmed
+   void attSeperator(Node* In);
+   void sorting(QVector <Node*> &vec);
+   void XMLtoJSON(Node* node, int &lvl);
+   void commaChecker(Node* node);
 };
 
 #endif // XML_TREE_H

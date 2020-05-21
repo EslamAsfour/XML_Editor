@@ -78,6 +78,8 @@ void XML_Tree::FillTree (QString FilePath)
      {
         input= in.readLine();
 
+
+
         //Opening Tag			// We can take Tag name and Attribute from this line
                 if(input[0] == '<' && input[1] != '/' )
                 {
@@ -102,12 +104,14 @@ void XML_Tree::FillTree (QString FilePath)
                     {
 
                         Node* In = new Node(att, tag);
+                        attSeperator(In);
                         insertChild(In);
                         DoneNode();
                     }
                     else
                     {
                         Node* In = new Node(att, tag);
+                        attSeperator(In);
                         insertChild(In);
                     }
                 }
@@ -171,7 +175,15 @@ void XML_Tree::FillTree (QString FilePath)
                          if (index2 + 1 < index1)
                          {
                              QString data = input.mid(index2 +1, index1 - index2 -1);
-                             out << data<< endl;
+                             bool flag = false;
+                             foreach(QChar str, data)
+                             {
+                                 if(str != ' ')
+                                     flag = true;
+                             }
+                             if(flag == true)
+                                 out << data<< endl;
+
                          }
                      }
                      else if (input[i] == '>')
@@ -325,4 +337,546 @@ if(*(N->Attribute.rbegin()) != '/')
 }
 
 
+void XML_Tree::word_info(Node* head, QString input_1 , QString &out, QString &num) {
+    QString att;
+    if (head->Children.size() != 0) {
+        num += QString::number(head->Children.size()) + "\n";
+        for (int i = 0; i <head->Children.size(); i++) {
+            if (head->Children[i]->TagName == "synset") {
+                for (int k = 0; k <head->Children[i]->Children.size(); k++) {
+                    if (head->Children[i]->Children[k]->TagName == "word") {
+                        if (head->Children[i]->Children[k]->Data == input_1) {
+                            Node* search = head->Children[i]->Children[k]->Parent;
+                            for (int j = 0; j<search->Children.size(); j++) {
+                                if (search->Children[j]->TagName == "def") {
+                                    out += search->Children[j]->Data + "\n";
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (head->Children.size() == 0) {
+                return;
+            }
+        }
+    }
+}
 
+
+
+void XML_Tree::word_id(Node* head, QString input_1 , QString &out) {
+QVector<QString>s(0);
+    QString att;
+    if (head->Children.size() != 0) {
+        for (int i = 0;i < head->Children.size();i++) {
+            if (head->Children[i]->TagName == "synset") {
+                for (int j=0;j<head->Children[i]->Children.size();j++) {
+                    if (head->Children[i]->Children[j]->TagName == "word") {
+                        if (head->Children[i]->Children[j]->Data == input_1){
+                            Node* search = head->Children[i]->Children[j]->Parent;
+                            for (int k= 0;k< search->Children.size();k++) {
+                                if (search->Children[k]->Data == "Hypernym")
+                                {
+                                    att = search->Children[k]->Attribute;
+                                    while (att.indexOf("n") != -1) {
+                                        int x = att.indexOf("n");
+                                        s.push_back(att.mid(x, 9));
+                                        att.remove(x, 9);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        for (int k = 0;k<s.size();k++) {
+            for (int i = 0;i < head->Children.size();i++) {
+                if ((head->Children[i]->TagName == "synset") &&
+                    (head->Children[i]->Attribute.indexOf(s[k])) != -1) {
+                    for (int j = 0; j <head->Children[i]->Children.size();j++){
+                        if (head->Children[i]->Children[j]->TagName == "word") {
+                            out  += head->Children[i]->Children[j]->Data + "\n";
+                        }
+                }
+              }
+            }
+        }
+    }
+}
+
+
+
+void XML_Tree::XMLtoJSON(Node * node , int &lvl)
+{
+    QFile Out("C:/Users/LEGION/Documents/XMLFormat.txt");
+
+    if(!Out.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
+    {
+         return ;
+    }
+    QTextStream outfile(&Out);
+
+    if (node->Parent == NULL) {
+        outfile << "{" << endl;
+    }
+
+    if (node->Children.size() != 0) {
+        node->sorted = node->Children;
+        sorting(node->sorted);
+        for (int i = 0; i < node->Children.size(); i++) {
+            for (int j = 0; j < node->Children.size(); j++) {
+                if (node->Children[i]->TagName == node->sorted[j]->TagName)
+                {
+                    node->Children[i]->repeated++;
+
+                    //note : law repeated marten fa hwa mawgod 3 mrat
+
+                    if (node->Children[i]->repeated == 1) {
+                        node->Children[i]->starting_pos = j;
+                    }
+                }
+            }
+        }
+
+        if (node->repeated > 1 && node->printed == false) {
+            int fasttemp = node->starting_pos;
+            for (int i = 0; i < node->repeated; i++) {
+                node->Parent->sorted[fasttemp]->printed = true;
+                fasttemp++;
+            }
+            //spaces
+            lvl++;
+            for (int y = 0; y < lvl; y++) {
+                outfile << "\t";
+            }
+            outfile << "\"" << node->TagName << "\": [" << endl;
+            for (int i = 0; i < node->repeated; i++) {
+                for (int y = 0; y < lvl; y++) {
+                    outfile << "\t";
+                }
+                outfile << "{" << endl;
+                if (i != 0) {
+                    node->Parent->sorted[node->starting_pos]->sorted = node->Parent->sorted[node->starting_pos]->Children;
+                    sorting(node->Parent->sorted[node->starting_pos]->sorted);
+                    for (int h = 0; h < node->Parent->sorted[node->starting_pos]->Children.size(); h++) {
+                        for (int j = 0; j < node->Parent->sorted[node->starting_pos]->Children.size(); j++) {
+                            if (node->Parent->sorted[node->starting_pos]->Children[h]->TagName == node->Parent->sorted[node->starting_pos]->sorted[j]->TagName)
+                            {
+                                node->Parent->sorted[node->starting_pos]->Children[h]->repeated++;
+
+                                //note : law repeated marten fa hwa mawgod 3 mrat
+
+                                if (node->Parent->sorted[node->starting_pos]->Children[h]->repeated == 1) {
+                                    node->Parent->sorted[node->starting_pos]->Children[h]->starting_pos = j;
+                                }
+                            }
+                        }
+                    }
+                }
+                for (int j = 0; j < node->Parent->sorted[node->starting_pos]->Children.size(); j++) {
+                    XMLtoJSON(node->Parent->sorted[node->starting_pos]->Children[j],lvl);
+
+                }
+                if (node->Parent->sorted[node->starting_pos]->AttributeName.size() != 0) {
+                    for (int z = 0; z < node->Parent->sorted[node->starting_pos]->AttributeName.size(); z++) {
+                        if (z + 1 == node->Parent->sorted[node->starting_pos]->AttributeName.size() && node->Parent->sorted[node->starting_pos]->Data == "") {
+                            for (int y = 0; y < lvl; y++) {
+                                outfile << "\t";
+                            }
+                            outfile << "\"@" << node->Parent->sorted[node->starting_pos]->AttributeName[z] << "\": \"" << node->Parent->sorted[node->starting_pos]->AttributeVal[z] << "\"" << endl;
+                        }
+                        else {
+                            for (int y = 0; y < lvl; y++) {
+                                outfile << "\t";
+                            }
+                            outfile << "\"@" << node->Parent->sorted[node->starting_pos]->AttributeName[z] << "\": \"" << node->Parent->sorted[node->starting_pos]->AttributeVal[z] << "\"," << endl;
+                        }
+                    }
+                    //check comma
+                }
+                //ghyrt de mn node ll bta3a eltwela de
+                if (node->Parent->sorted[node->starting_pos]->Data != "") {
+                    for (int y = 0; y < lvl; y++) {
+                        outfile << "\t";
+                    }
+                    outfile << "\"#text" << "\": \"" << node->Parent->sorted[node->starting_pos]->Data << "\"" << endl;
+                    //comma check
+                }
+                if (i + 1 == node->repeated) {
+                    for (int y = 0; y < lvl; y++) {
+                        outfile << "\t";
+                    }
+                    outfile << "}" << endl;
+                }
+                else {
+                    for (int y = 0; y < lvl; y++) {
+                        outfile << "\t";
+                    }
+                    outfile << "}," << endl;
+                }
+                node->starting_pos = node->starting_pos + 1;
+            }
+
+            if (node == node->Parent->Children[node->Parent->Children.size() - 1]) {
+                for (int y = 0; y < lvl; y++) {
+                    outfile << "\t";
+                }
+                outfile << "]" << endl;
+
+            }
+            else {
+                for (int y = 0; y < lvl; y++) {
+                    outfile << "\t";
+                }
+                outfile << "]," << endl;
+
+            }
+            //comma check
+            lvl--;
+        }
+        else if (node->repeated == 1 || node->repeated == 0) {
+            lvl++;
+                for (int y = 0; y < lvl; y++) {
+                    outfile << "\t";
+                }
+            outfile << "\"" << node->TagName << "\": {" << endl;
+            for (int i = 0; i < node->Children.size(); i++) {
+                XMLtoJSON(node->Children[i],lvl);
+            }
+            if (node->Data != "" && node->AttributeName.size() == 0) {
+                for (int y = 0; y < lvl; y++) {
+                    outfile << "\t";
+                }
+                outfile << "\"#text\": \"" << node->Data << "\"" << endl;
+
+            }
+            else if (node->AttributeName.size() != 0) {
+
+                for (int i = 0; i < node->AttributeName.size(); i++) {
+
+                    if (i + 1 == node->AttributeName.size() && node->Data == "") {
+                        for (int y = 0; y < lvl; y++) {
+                            outfile << "\t";
+                        }
+                        outfile << "\"@" << node->AttributeName[i] << "\": \"" << node->AttributeVal[i] << "\"" << endl;
+                    }
+                    else {
+                        for (int y = 0; y < lvl; y++) {
+                            outfile << "\t";
+                        }
+                        outfile << "\"@" << node->AttributeName[i] << "\": \"" << node->AttributeVal[i] << "\"," << endl;
+                    }
+
+                }
+
+                if (node->Data != "") {
+                    for (int y = 0; y < lvl; y++) {
+                        outfile << "\t";
+                    }
+                    outfile << "\"#text\": \"" << node->Data << "\"" << endl;
+
+                }
+
+            }
+
+
+            if (node->Parent == NULL) {
+                for (int y = 0; y < lvl; y++) {
+                    outfile << "\t";
+                }
+                outfile << "}" << endl;
+
+            }
+            else if (node == node->Parent->Children[node->Parent->Children.size() - 1]) {
+                for (int y = 0; y < lvl; y++) {
+                    outfile << "\t";
+                }
+                outfile << "}" << endl;
+            }
+            else {
+                for (int y = 0; y < lvl; y++) {
+                    outfile << "\t";
+                }
+                outfile << "}," << endl;
+
+            }
+            //comma check
+            lvl--;
+        }
+
+    }
+
+    else if(node->Children.size() == 0) {
+
+        if (node->repeated > 1  && node->printed == false) {
+            lvl++;
+            for (int y = 0; y < lvl; y++) {
+                outfile << "\t";
+            }
+            outfile << "\"" << node->TagName << "\": [" << endl;
+            for (int i = 0; i < node->repeated; i++) {
+
+                if (node->Parent->sorted[node->starting_pos]->AttributeName.size() != 0) {
+                    for (int y = 0; y < lvl; y++) {
+                        outfile << "\t";
+                    }
+                    outfile << "{" << endl;
+                    for (int z = 0; z < node->Parent->sorted[node->starting_pos]->AttributeName.size(); z++) {
+                        if (z + 1 == node->Parent->sorted[node->starting_pos]->AttributeName.size() && node->Parent->sorted[node->starting_pos]->Data == "") {
+                            for (int y = 0; y < lvl; y++) {
+                                outfile << "\t";
+                            }
+                            outfile << "\"@" << node->Parent->sorted[node->starting_pos]->AttributeName[z] << "\": \"" << node->Parent->sorted[node->starting_pos]->AttributeVal[z] << "\"" << endl;
+                        }
+                        else {
+                            for (int y = 0; y < lvl; y++) {
+                                outfile << "\t";
+                            }
+                            outfile << "\"@" << node->Parent->sorted[node->starting_pos]->AttributeName[z] << "\": \"" << node->Parent->sorted[node->starting_pos]->AttributeVal[z] << "\"," << endl;
+                        }
+
+
+                    }
+                    if (node->Parent->sorted[node->starting_pos]->Data != "") {
+                        for (int y = 0; y < lvl; y++) {
+                            outfile << "\t";
+                        }
+                        outfile << "\"#text" << "\": \"" << node->Parent->sorted[node->starting_pos]->Data << "\"" << endl;
+                        //comma check
+                    }
+
+                    if (i + 1 == node->repeated) {
+                        for (int y = 0; y < lvl; y++) {
+                            outfile << "\t";
+                        }
+                        outfile << "}" << endl;
+                    }
+                    else {
+                        for (int y = 0; y < lvl; y++) {
+                            outfile << "\t";
+                        }
+                        outfile << "}," << endl;
+                    }
+
+                    //check comma
+                }
+
+                else if (node->Parent->sorted[node->starting_pos]->AttributeName.size() == 0 && node->Parent->sorted[node->starting_pos]->Data != "") {
+                    if (i + 1 == node->repeated) {
+                        for (int y = 0; y < lvl; y++) {
+                            outfile << "\t";
+                        }
+                        outfile << "\"" << node->Parent->sorted[node->starting_pos]->Data << "\"" << endl;
+                    }
+                    else {
+                        for (int y = 0; y < lvl; y++) {
+                            outfile << "\t";
+                        }
+                        outfile << "\"" << node->Parent->sorted[node->starting_pos]->Data << "\"," << endl;
+
+                    }
+                }
+                else {
+
+                    if (i+1 == node->repeated) {
+                        for (int y = 0; y < lvl; y++) {
+                            outfile << "\t";
+                        }
+                        outfile << "\""<<"\"" << endl;
+
+                    }
+                    else {
+                        for (int y = 0; y < lvl; y++) {
+                            outfile << "\t";
+                        }
+                        outfile << "\""<<"\"," << endl;
+
+                    }
+                }
+
+                node->Parent->sorted[node->starting_pos]->printed = true;
+
+                node->starting_pos++;
+            }
+
+
+            if (node == node->Parent->Children[node->Parent->Children.size() - 1]) {
+                for (int y = 0; y < lvl; y++) {
+                    outfile << "\t";
+                }
+                outfile << "]" << endl;
+
+            }
+            else {
+                for (int y = 0; y < lvl; y++) {
+                    outfile << "\t";
+                }
+                outfile << "]," << endl;
+
+            }
+            //comma check
+            lvl--;
+        }
+
+        else if (node->repeated == 1 || node->repeated == 0) {
+
+            lvl++;
+
+            if (node->Data != "" && node->AttributeName.size() == 0) {
+
+                if (node == node->Parent->Children[node->Parent->Children.size() - 1] && node->Parent->Data == "" && node->Parent->AttributeName.size() == 0) {
+                    for (int y = 0; y < lvl; y++) {
+                        outfile << "\t";
+                    }
+                    outfile << "\"" << node->TagName << "\": \"" << node->Data << "\"" << endl;
+                }
+                else {
+                    for (int y = 0; y < lvl; y++) {
+                        outfile << "\t";
+                    }
+                    outfile << "\"" << node->TagName << "\": \"" << node->Data << "\"," << endl;
+                }
+
+            }
+            else if (node->AttributeName.size() != 0) {
+                for (int y = 0; y < lvl; y++) {
+                    outfile << "\t";
+                }
+                outfile << "\"" << node->TagName << "\": {" << endl;
+
+
+                for (int i = 0; i < node->AttributeName.size(); i++) {
+
+                    if (i + 1 == node->AttributeName.size() && node->Data == "") {
+                        for (int y = 0; y < lvl; y++) {
+                            outfile << "\t";
+                        }
+                        outfile << "\"@" << node->AttributeName[i] << "\": \"" << node->AttributeVal[i] << "\"" << endl;
+                    }
+                    else {
+                        for (int y = 0; y < lvl; y++) {
+                            outfile << "\t";
+                        }
+                        outfile << "\"@" << node->AttributeName[i] << "\": \"" << node->AttributeVal[i] << "\"," << endl;
+                    }
+
+                }
+
+                if (node->Data != "") {
+                    for (int y = 0; y < lvl; y++) {
+                        outfile << "\t";
+                    }
+                    outfile << "\"#text\": \"" << node->Data << "\"" << endl;
+
+                }
+
+                if (node == node->Parent->Children[node->Parent->Children.size() - 1] && node->Parent->Data == "" && node->Parent->AttributeName.size() == 0) {
+                    for (int y = 0; y < lvl; y++) {
+                        outfile << "\t";
+                    }
+                    outfile << "}" << endl;
+
+                }
+                else {
+                    for (int y = 0; y < lvl; y++) {
+                        outfile << "\t";
+                    }
+                    outfile << "}," << endl;
+
+                }
+
+            }
+            else {
+                for (int y = 0; y < lvl; y++) {
+                    outfile << "\t";
+                }
+                outfile << "\"" << node->TagName << "\": " << "\""<<"\"" << endl;
+                if (node == node->Parent->Children[node->Parent->Children.size() - 1]) {
+                    for (int y = 0; y < lvl; y++) {
+                        outfile << "\t";
+                    }
+                    outfile << "}" << endl;
+
+                }
+                else {
+                    for (int y = 0; y < lvl; y++) {
+                        outfile << "\t";
+                    }
+                    outfile << "}," << endl;
+
+                }
+            }
+            lvl--;
+        }
+
+    }
+
+    if (node->Parent == NULL) {
+        outfile << "}" << endl;
+    }
+
+}
+
+void XML_Tree::commaChecker(Node * node)
+{
+    if (node->Children.size() != 0) {
+
+
+    }
+    else {
+        if (node->TagName == node->Parent->Children[node->Parent->Children.size() - 1]->TagName || node->Parent == NULL) {
+            //outfile << "}" << endl;
+        }
+        else {
+            //outfile << "}," << endl;
+        }
+    }
+
+}
+
+
+void XML_Tree::attSeperator(Node * In)
+{
+    if (In->Attribute.length() > 0) {
+        int starting = 0;
+        bool checkForQuot = false;
+
+        for (int i = 0; i < In->Attribute.length(); i++) {
+            if (In->Attribute[i] == '=') {
+                In->AttributeName.push_back(In->Attribute.mid(starting, i - starting));
+
+            }
+            else if (In->Attribute[i] == '"' && checkForQuot == false) {
+                checkForQuot = true;
+                starting = i + 1;
+            }
+            else if (In->Attribute[i] == '"' && checkForQuot == true) {
+                In->AttributeVal.push_back(In->Attribute.mid(starting, i - starting));
+                checkForQuot = false;
+            }
+            else if (In->Attribute[i] == ' ' && checkForQuot == false) {
+                starting = i + 1;
+            }
+        }
+
+    }
+}
+
+void XML_Tree::sorting(QVector<Node*> &vec)
+{
+
+    int i, j, min;
+    Node* temp;
+        for (i = 0; i < vec.size() ; i++) {
+            min = i;
+            for (j = i + 1; j < vec.size(); j++)
+                if (vec[j]->TagName < vec[min]->TagName)
+                    min = j;
+            temp = vec[i];
+            vec[i] = vec[min];
+            vec[min] = temp;
+        }
+
+}

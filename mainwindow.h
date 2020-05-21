@@ -26,6 +26,8 @@ private slots:
 
     void on_Submit_Word_clicked();
 
+    void on_pushButton_JSON_Form_clicked();
+
 private:
     Ui::MainWindow *ui;
     QString File_Path;
