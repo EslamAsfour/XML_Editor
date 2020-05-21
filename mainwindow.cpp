@@ -137,8 +137,16 @@ void MainWindow::on_pushButton_JSON_Form_clicked()
     int lvl = 0;
     QTime myTimer;
     myTimer.start();
+    QString out;
+   MainTree.XMLtoJSON(MainTree.GetHead(),lvl,out);
+   QFile Out("C:/Users/LEGION/Documents/XMLFormat.txt");
 
-   MainTree.XMLtoJSON(MainTree.GetHead(),lvl);
+       if (!Out.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
+       {
+           return;
+       }
+       QTextStream outfile(&Out);
+       outfile << out;
    int nMilliseconds = myTimer.elapsed();
    qDebug() << nMilliseconds/1000;
    qDebug() << "JSON end";

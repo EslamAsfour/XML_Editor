@@ -408,18 +408,13 @@ QVector<QString>s(0);
 
 
 
-void XML_Tree::XMLtoJSON(Node * node , int &lvl)
+void XML_Tree::XMLtoJSON(Node * node, int &lvl , QString &outfile)
 {
-    QFile Out("C:/Users/LEGION/Documents/XMLFormat.txt");
 
-    if(!Out.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
-    {
-         return ;
-    }
-    QTextStream outfile(&Out);
+
 
     if (node->Parent == NULL) {
-        outfile << "{" << endl;
+        outfile += "{\n";
     }
 
     if (node->Children.size() != 0) {
@@ -449,14 +444,14 @@ void XML_Tree::XMLtoJSON(Node * node , int &lvl)
             //spaces
             lvl++;
             for (int y = 0; y < lvl; y++) {
-                outfile << "\t";
+                outfile += "\t";
             }
-            outfile << "\"" << node->TagName << "\": [" << endl;
+            outfile += "\"" + node->TagName + "\": [" + "\n";
             for (int i = 0; i < node->repeated; i++) {
                 for (int y = 0; y < lvl; y++) {
-                    outfile << "\t";
+                    outfile += "\t";
                 }
-                outfile << "{" << endl;
+                outfile += "{\n";
                 if (i != 0) {
                     node->Parent->sorted[node->starting_pos]->sorted = node->Parent->sorted[node->starting_pos]->Children;
                     sorting(node->Parent->sorted[node->starting_pos]->sorted);
@@ -476,22 +471,22 @@ void XML_Tree::XMLtoJSON(Node * node , int &lvl)
                     }
                 }
                 for (int j = 0; j < node->Parent->sorted[node->starting_pos]->Children.size(); j++) {
-                    XMLtoJSON(node->Parent->sorted[node->starting_pos]->Children[j],lvl);
+                    XMLtoJSON(node->Parent->sorted[node->starting_pos]->Children[j], lvl,outfile);
 
                 }
                 if (node->Parent->sorted[node->starting_pos]->AttributeName.size() != 0) {
                     for (int z = 0; z < node->Parent->sorted[node->starting_pos]->AttributeName.size(); z++) {
                         if (z + 1 == node->Parent->sorted[node->starting_pos]->AttributeName.size() && node->Parent->sorted[node->starting_pos]->Data == "") {
                             for (int y = 0; y < lvl; y++) {
-                                outfile << "\t";
+                                outfile += "\t";
                             }
-                            outfile << "\"@" << node->Parent->sorted[node->starting_pos]->AttributeName[z] << "\": \"" << node->Parent->sorted[node->starting_pos]->AttributeVal[z] << "\"" << endl;
+                            outfile += "\"@" + node->Parent->sorted[node->starting_pos]->AttributeName[z] + "\": \"" + node->Parent->sorted[node->starting_pos]->AttributeVal[z] + "\"" + "\n";
                         }
                         else {
                             for (int y = 0; y < lvl; y++) {
-                                outfile << "\t";
+                                outfile += "\t";
                             }
-                            outfile << "\"@" << node->Parent->sorted[node->starting_pos]->AttributeName[z] << "\": \"" << node->Parent->sorted[node->starting_pos]->AttributeVal[z] << "\"," << endl;
+                            outfile += "\"@" + node->Parent->sorted[node->starting_pos]->AttributeName[z] + "\": \"" + node->Parent->sorted[node->starting_pos]->AttributeVal[z] + "\"," + "\n";
                         }
                     }
                     //check comma
@@ -499,38 +494,38 @@ void XML_Tree::XMLtoJSON(Node * node , int &lvl)
                 //ghyrt de mn node ll bta3a eltwela de
                 if (node->Parent->sorted[node->starting_pos]->Data != "") {
                     for (int y = 0; y < lvl; y++) {
-                        outfile << "\t";
+                        outfile += "\t";
                     }
-                    outfile << "\"#text" << "\": \"" << node->Parent->sorted[node->starting_pos]->Data << "\"" << endl;
+                    outfile += "\"#text\": \""  + node->Parent->sorted[node->starting_pos]->Data + "\"" + "\n";
                     //comma check
                 }
                 if (i + 1 == node->repeated) {
                     for (int y = 0; y < lvl; y++) {
-                        outfile << "\t";
+                        outfile += "\t";
                     }
-                    outfile << "}" << endl;
+                    outfile += "}\n";
                 }
                 else {
                     for (int y = 0; y < lvl; y++) {
-                        outfile << "\t";
+                        outfile += "\t";
                     }
-                    outfile << "}," << endl;
+                    outfile += "},\n";
                 }
                 node->starting_pos = node->starting_pos + 1;
             }
 
             if (node == node->Parent->Children[node->Parent->Children.size() - 1]) {
                 for (int y = 0; y < lvl; y++) {
-                    outfile << "\t";
+                    outfile += "\t";
                 }
-                outfile << "]" << endl;
+                outfile += "]\n" ;
 
             }
             else {
                 for (int y = 0; y < lvl; y++) {
-                    outfile << "\t";
+                    outfile += "\t";
                 }
-                outfile << "]," << endl;
+                outfile += "],\n";
 
             }
             //comma check
@@ -538,18 +533,18 @@ void XML_Tree::XMLtoJSON(Node * node , int &lvl)
         }
         else if (node->repeated == 1 || node->repeated == 0) {
             lvl++;
-                for (int y = 0; y < lvl; y++) {
-                    outfile << "\t";
-                }
-            outfile << "\"" << node->TagName << "\": {" << endl;
+            for (int y = 0; y < lvl; y++) {
+                outfile += "\t";
+            }
+            outfile += "\"" + node->TagName + "\": {" + "\n";
             for (int i = 0; i < node->Children.size(); i++) {
-                XMLtoJSON(node->Children[i],lvl);
+                XMLtoJSON(node->Children[i], lvl,outfile);
             }
             if (node->Data != "" && node->AttributeName.size() == 0) {
                 for (int y = 0; y < lvl; y++) {
-                    outfile << "\t";
+                    outfile += "\t";
                 }
-                outfile << "\"#text\": \"" << node->Data << "\"" << endl;
+                outfile += "\"#text\": \"" + node->Data + "\"" + "\n";
 
             }
             else if (node->AttributeName.size() != 0) {
@@ -558,24 +553,24 @@ void XML_Tree::XMLtoJSON(Node * node , int &lvl)
 
                     if (i + 1 == node->AttributeName.size() && node->Data == "") {
                         for (int y = 0; y < lvl; y++) {
-                            outfile << "\t";
+                            outfile += "\t";
                         }
-                        outfile << "\"@" << node->AttributeName[i] << "\": \"" << node->AttributeVal[i] << "\"" << endl;
+                        outfile += "\"@" + node->AttributeName[i] + "\": \"" + node->AttributeVal[i] + "\"" + "\n";
                     }
                     else {
                         for (int y = 0; y < lvl; y++) {
-                            outfile << "\t";
+                            outfile += "\t";
                         }
-                        outfile << "\"@" << node->AttributeName[i] << "\": \"" << node->AttributeVal[i] << "\"," << endl;
+                        outfile += "\"@" + node->AttributeName[i] + "\": \"" + node->AttributeVal[i] + "\"," + "\n";
                     }
 
                 }
 
                 if (node->Data != "") {
                     for (int y = 0; y < lvl; y++) {
-                        outfile << "\t";
+                        outfile += "\t";
                     }
-                    outfile << "\"#text\": \"" << node->Data << "\"" << endl;
+                    outfile += "\"#text\": \"" + node->Data + "\"" + "\n";
 
                 }
 
@@ -584,22 +579,22 @@ void XML_Tree::XMLtoJSON(Node * node , int &lvl)
 
             if (node->Parent == NULL) {
                 for (int y = 0; y < lvl; y++) {
-                    outfile << "\t";
+                    outfile += "\t";
                 }
-                outfile << "}" << endl;
+                outfile += "}\n";
 
             }
             else if (node == node->Parent->Children[node->Parent->Children.size() - 1]) {
                 for (int y = 0; y < lvl; y++) {
-                    outfile << "\t";
+                    outfile += "\t";
                 }
-                outfile << "}" << endl;
+                outfile += "}\n";
             }
             else {
                 for (int y = 0; y < lvl; y++) {
-                    outfile << "\t";
+                    outfile += "\t";
                 }
-                outfile << "}," << endl;
+                outfile += "},\n";
 
             }
             //comma check
@@ -608,56 +603,56 @@ void XML_Tree::XMLtoJSON(Node * node , int &lvl)
 
     }
 
-    else if(node->Children.size() == 0) {
+    else if (node->Children.size() == 0) {
 
-        if (node->repeated > 1  && node->printed == false) {
+        if (node->repeated > 1 && node->printed == false) {
             lvl++;
             for (int y = 0; y < lvl; y++) {
-                outfile << "\t";
+                outfile += "\t";
             }
-            outfile << "\"" << node->TagName << "\": [" << endl;
+            outfile += "\"" + node->TagName + "\": [" + "\n";
             for (int i = 0; i < node->repeated; i++) {
 
                 if (node->Parent->sorted[node->starting_pos]->AttributeName.size() != 0) {
                     for (int y = 0; y < lvl; y++) {
-                        outfile << "\t";
+                        outfile += "\t";
                     }
-                    outfile << "{" << endl;
+                    outfile += "{\n";
                     for (int z = 0; z < node->Parent->sorted[node->starting_pos]->AttributeName.size(); z++) {
                         if (z + 1 == node->Parent->sorted[node->starting_pos]->AttributeName.size() && node->Parent->sorted[node->starting_pos]->Data == "") {
                             for (int y = 0; y < lvl; y++) {
-                                outfile << "\t";
+                                outfile += "\t";
                             }
-                            outfile << "\"@" << node->Parent->sorted[node->starting_pos]->AttributeName[z] << "\": \"" << node->Parent->sorted[node->starting_pos]->AttributeVal[z] << "\"" << endl;
+                            outfile += "\"@" + node->Parent->sorted[node->starting_pos]->AttributeName[z] + "\": \"" + node->Parent->sorted[node->starting_pos]->AttributeVal[z] + "\"" + "\n";
                         }
                         else {
                             for (int y = 0; y < lvl; y++) {
-                                outfile << "\t";
+                                outfile += "\t";
                             }
-                            outfile << "\"@" << node->Parent->sorted[node->starting_pos]->AttributeName[z] << "\": \"" << node->Parent->sorted[node->starting_pos]->AttributeVal[z] << "\"," << endl;
+                            outfile += "\"@" + node->Parent->sorted[node->starting_pos]->AttributeName[z] + "\": \"" + node->Parent->sorted[node->starting_pos]->AttributeVal[z] + "\"," + "\n";
                         }
 
 
                     }
                     if (node->Parent->sorted[node->starting_pos]->Data != "") {
                         for (int y = 0; y < lvl; y++) {
-                            outfile << "\t";
+                            outfile += "\t";
                         }
-                        outfile << "\"#text" << "\": \"" << node->Parent->sorted[node->starting_pos]->Data << "\"" << endl;
+                        outfile += "\"#text\": \""  + node->Parent->sorted[node->starting_pos]->Data + "\"" + "\n";
                         //comma check
                     }
 
                     if (i + 1 == node->repeated) {
                         for (int y = 0; y < lvl; y++) {
-                            outfile << "\t";
+                            outfile += "\t";
                         }
-                        outfile << "}" << endl;
+                        outfile += "}\n";
                     }
                     else {
                         for (int y = 0; y < lvl; y++) {
-                            outfile << "\t";
+                            outfile += "\t";
                         }
-                        outfile << "}," << endl;
+                        outfile += "},\n";
                     }
 
                     //check comma
@@ -666,33 +661,34 @@ void XML_Tree::XMLtoJSON(Node * node , int &lvl)
                 else if (node->Parent->sorted[node->starting_pos]->AttributeName.size() == 0 && node->Parent->sorted[node->starting_pos]->Data != "") {
                     if (i + 1 == node->repeated) {
                         for (int y = 0; y < lvl; y++) {
-                            outfile << "\t";
+                            outfile += "\t";
                         }
-                        outfile << "\"" << node->Parent->sorted[node->starting_pos]->Data << "\"" << endl;
+                        outfile += "\"" + node->Parent->sorted[node->starting_pos]->Data + "\"" + "\n";
                     }
                     else {
                         for (int y = 0; y < lvl; y++) {
-                            outfile << "\t";
+                            outfile += "\t";
                         }
-                        outfile << "\"" << node->Parent->sorted[node->starting_pos]->Data << "\"," << endl;
+                        outfile += "\"" + node->Parent->sorted[node->starting_pos]->Data + "\"," + "\n";
 
                     }
                 }
                 else {
 
-                    if (i+1 == node->repeated) {
+                    if (i + 1 == node->repeated) {
                         for (int y = 0; y < lvl; y++) {
-                            outfile << "\t";
+                            outfile += "\t";
                         }
-                        outfile << "\""<<"\"" << endl;
+                        outfile += "\"";
+                         outfile += "\"\n";
 
                     }
                     else {
                         for (int y = 0; y < lvl; y++) {
-                            outfile << "\t";
+                            outfile += "\t";
                         }
-                        outfile << "\""<<"\"," << endl;
-
+                        outfile += "\"" ;
+                        outfile +=  "\",\n";
                     }
                 }
 
@@ -704,16 +700,16 @@ void XML_Tree::XMLtoJSON(Node * node , int &lvl)
 
             if (node == node->Parent->Children[node->Parent->Children.size() - 1]) {
                 for (int y = 0; y < lvl; y++) {
-                    outfile << "\t";
+                    outfile += "\t";
                 }
-                outfile << "]" << endl;
+                outfile += "]\n" ;
 
             }
             else {
                 for (int y = 0; y < lvl; y++) {
-                    outfile << "\t";
+                    outfile += "\t";
                 }
-                outfile << "]," << endl;
+                outfile += "],\n" ;
 
             }
             //comma check
@@ -728,83 +724,83 @@ void XML_Tree::XMLtoJSON(Node * node , int &lvl)
 
                 if (node == node->Parent->Children[node->Parent->Children.size() - 1] && node->Parent->Data == "" && node->Parent->AttributeName.size() == 0) {
                     for (int y = 0; y < lvl; y++) {
-                        outfile << "\t";
+                        outfile += "\t";
                     }
-                    outfile << "\"" << node->TagName << "\": \"" << node->Data << "\"" << endl;
+                    outfile += "\"" + node->TagName + "\": \"" + node->Data + "\"" + "\n";
                 }
                 else {
                     for (int y = 0; y < lvl; y++) {
-                        outfile << "\t";
+                        outfile += "\t";
                     }
-                    outfile << "\"" << node->TagName << "\": \"" << node->Data << "\"," << endl;
+                    outfile += "\"" + node->TagName + "\": \"" + node->Data + "\"," + "\n";
                 }
 
             }
             else if (node->AttributeName.size() != 0) {
                 for (int y = 0; y < lvl; y++) {
-                    outfile << "\t";
+                    outfile += "\t";
                 }
-                outfile << "\"" << node->TagName << "\": {" << endl;
+                outfile += "\"" + node->TagName + "\": {" + "\n";
 
 
                 for (int i = 0; i < node->AttributeName.size(); i++) {
 
                     if (i + 1 == node->AttributeName.size() && node->Data == "") {
                         for (int y = 0; y < lvl; y++) {
-                            outfile << "\t";
+                            outfile += "\t";
                         }
-                        outfile << "\"@" << node->AttributeName[i] << "\": \"" << node->AttributeVal[i] << "\"" << endl;
+                        outfile += "\"@" + node->AttributeName[i] + "\": \"" + node->AttributeVal[i] + "\"" + "\n";
                     }
                     else {
                         for (int y = 0; y < lvl; y++) {
-                            outfile << "\t";
+                            outfile += "\t";
                         }
-                        outfile << "\"@" << node->AttributeName[i] << "\": \"" << node->AttributeVal[i] << "\"," << endl;
+                        outfile += "\"@" + node->AttributeName[i] + "\": \"" + node->AttributeVal[i] + "\"," + "\n";
                     }
 
                 }
 
                 if (node->Data != "") {
                     for (int y = 0; y < lvl; y++) {
-                        outfile << "\t";
+                        outfile += "\t";
                     }
-                    outfile << "\"#text\": \"" << node->Data << "\"" << endl;
+                    outfile += "\"#text\": \"" + node->Data + "\"" + "\n";
 
                 }
 
                 if (node == node->Parent->Children[node->Parent->Children.size() - 1] && node->Parent->Data == "" && node->Parent->AttributeName.size() == 0) {
                     for (int y = 0; y < lvl; y++) {
-                        outfile << "\t";
+                        outfile += "\t";
                     }
-                    outfile << "}" << endl;
+                    outfile += "}\n";
 
                 }
                 else {
                     for (int y = 0; y < lvl; y++) {
-                        outfile << "\t";
+                        outfile += "\t";
                     }
-                    outfile << "}," << endl;
+                    outfile += "},\n";
 
                 }
 
             }
             else {
                 for (int y = 0; y < lvl; y++) {
-                    outfile << "\t";
+                    outfile += "\t";
                 }
-                outfile << "\"" << node->TagName << "\": " << "\""<<"\"" << endl;
+                outfile += "\"" + node->TagName + "\": " + "\"" + "\"" + "\n";
                 if (node == node->Parent->Children[node->Parent->Children.size() - 1]) {
                     for (int y = 0; y < lvl; y++) {
-                        outfile << "\t";
+                        outfile += "\t";
                     }
-                    outfile << "}" << endl;
+                    outfile += "}\n" ;
 
                 }
                 else {
                     for (int y = 0; y < lvl; y++) {
-                        outfile << "\t";
+                        outfile += "\t";
                     }
-                    outfile << "}," << endl;
+                    outfile += "},\n" ;
 
                 }
             }
@@ -814,10 +810,13 @@ void XML_Tree::XMLtoJSON(Node * node , int &lvl)
     }
 
     if (node->Parent == NULL) {
-        outfile << "}" << endl;
+        outfile += "}\n" ;
     }
 
+
 }
+
+
 
 void XML_Tree::commaChecker(Node * node)
 {

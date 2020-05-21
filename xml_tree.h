@@ -60,7 +60,7 @@ public:
    // Ahmed
    void attSeperator(Node* In);
    void sorting(QVector <Node*> &vec);
-   void XMLtoJSON(Node* node, int &lvl);
+   void XMLtoJSON(Node * node, int &lvl , QString &outfile);
    void commaChecker(Node* node);
 };
 
