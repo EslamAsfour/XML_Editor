@@ -4,7 +4,7 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QStack>
-
+#include <QDir>
 
 XML_Tree::XML_Tree()
 {
@@ -141,8 +141,8 @@ void XML_Tree::FillTree (QString FilePath)
      QStack <QString> my_stack;
      QString value,comp;
      QFile inFile(InputFilePath);
-     QFile Out("C:/Users/LEGION/Documents/InRdy.txt");
-
+     QFile Out(QDir::currentPath() +"/InRdy.txt");
+      qDebug() << QDir::currentPath();
      if(! inFile.open(QFile::ReadOnly | QFile::Text))
      {
          return ;

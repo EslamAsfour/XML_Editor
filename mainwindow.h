@@ -28,9 +28,12 @@ private slots:
 
     void on_pushButton_JSON_Form_clicked();
 
+    void on_pushButton_PrettyForm_clicked();
+
 private:
     Ui::MainWindow *ui;
     QString File_Path;
     XML_Tree MainTree;
+    bool JSONDone;
 };
 #endif // MAINWINDOW_H

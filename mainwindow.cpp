@@ -14,6 +14,14 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     ui->stackedWidget_9->setCurrentIndex(0);
+    QFile o1(QDir::currentPath() +"/InRdy.txt");
+    QFile o2(QDir::currentPath() +"/XMLFormat.txt");
+    QFile o3(QDir::currentPath() +"/Output1.txt");
+    o1.open(QFile::WriteOnly|QFile::Truncate);
+    o2.open(QFile::WriteOnly|QFile::Truncate);
+    o3.open(QFile::WriteOnly|QFile::Truncate);
+    QMessageBox::information(this,"Output Dir",QDir::currentPath()  );
+    JSONDone = false;
 }
 
 MainWindow::~MainWindow()
@@ -36,18 +44,19 @@ void MainWindow::on_pushButton_2_clicked()
    QString  s;
 
     //Formatting
-    qDebug() << "Start";
+   qDebug() << "Start";
    MainTree.MakeItReady(File_Path);
-    qDebug() << "End";
+   qDebug() << "End";
    //Show the input fill in the GUI
     QTime myTimer;
     myTimer.start();
 
 
-  // while(!in.atEnd())
+   for(int i = 0 ; i < 100 ; i++)
     {
-     //  s= in.readAll();
-      // ui->Page1->findChild<QTextBrowser*>("textBrowser_Input")->insertPlainText(s);
+      s= in.readLine();
+      ui->Page1->findChild<QTextBrowser*>("textBrowser_Input")->append(s);
+
    }
     int nMilliseconds = myTimer.elapsed();
     inputFile.close();
@@ -60,11 +69,11 @@ void MainWindow::on_pushButton_2_clicked()
 void MainWindow::on_pushButton_clicked()
 {
 
-    QString InPathRdy = "C:/Users/LEGION/Documents/InRdy.txt" ;
+    QString InPathRdy = QDir::currentPath() +"/InRdy.txt" ;
      qDebug() << "Fiil Tree start";
     MainTree.FillTree(InPathRdy);
     qDebug() << "Fiil Tree end";
-    QString OutPath = "C:/Users/LEGION/Documents/Output1.txt" ;
+    QString OutPath = QDir::currentPath() +"/Output1.txt" ;
     QFile OutFile(OutPath);
     if(OutFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
     {
@@ -88,10 +97,10 @@ void MainWindow::on_pushButton_clicked()
 
 
     //Show the input fill in the GUI
-    //while(!in.atEnd())
+    for(int i = 0 ; i < 100 ; i++)
      {
-       // s= in.readAll();
-       // ui->Page1->findChild<QTextBrowser*>("textBrowser_Output")->insertPlainText(s);
+        s= in.readLine();
+        ui->Page1->findChild<QTextBrowser*>("textBrowser_Output")->append(s);
     }
 
    inputFile.close();
@@ -103,7 +112,6 @@ void MainWindow::on_pushButton_clicked()
 void MainWindow::on_pushButton_4_clicked()
 {
     ui->stackedWidget_9->setCurrentIndex(1);
-
 }
 
 void MainWindow::on_Submit_Word_clicked()
@@ -133,21 +141,56 @@ void MainWindow::on_Submit_Word_clicked()
 
 void MainWindow::on_pushButton_JSON_Form_clicked()
 {
-    ui->Page1->findChild<QTextBrowser*>("textBrowser_Output")->setText("");
-    int lvl = 0;
-    QTime myTimer;
-    myTimer.start();
-    QString out;
-   MainTree.XMLtoJSON(MainTree.GetHead(),lvl,out);
-   QFile Out("C:/Users/LEGION/Documents/XMLFormat.txt");
 
-       if (!Out.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
+     ui->Page1->findChild<QTextBrowser*>("textBrowser_Output")->setText("");
+    if(JSONDone == false)
+    {
+        QMessageBox::information(this,"Warning", "This operation may take some time formatting big data");
+        int lvl = 0;
+
+        QString out;
+       MainTree.XMLtoJSON(MainTree.GetHead(),lvl,out);
+       QFile Out(QDir::currentPath() + "/XMLFormat.txt");
+
+           if (!Out.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
+           {
+               return;
+           }
+           QTextStream outfile(&Out);
+           outfile << out;
+           JSONDone = true;
+
+    }
+       QFile JSON(QDir::currentPath() +"/XMLFormat.txt");
+       if(! JSON.open(QFile::ReadOnly | QFile::Text))
        {
+           QMessageBox::warning(this,"Error","File Not Opened");
            return;
        }
-       QTextStream outfile(&Out);
-       outfile << out;
-   int nMilliseconds = myTimer.elapsed();
-   qDebug() << nMilliseconds/1000;
-   qDebug() << "JSON end";
+       QTextStream in(&JSON);
+       QString  s;
+       for (int var = 0; var < 100; ++var)
+       {
+           s= in.readLine();
+           ui->Page1->findChild<QTextBrowser*>("textBrowser_Output")->append(s);
+       }
+}
+
+void MainWindow::on_pushButton_PrettyForm_clicked()
+{
+    ui->Page1->findChild<QTextBrowser*>("textBrowser_Output")->setText("");
+    QFile XML(QDir::currentPath() +"/Output1.txt");
+    if(! XML.open(QFile::ReadOnly | QFile::Text))
+    {
+        QMessageBox::warning(this,"Error","File Not Opened");
+        return;
+    }
+    QTextStream in(&XML);
+    QString  s;
+    for (int var = 0; var < 100; ++var)
+    {
+        s= in.readLine();
+        ui->Page1->findChild<QTextBrowser*>("textBrowser_Output")->append(s);
+    }
+
 }
